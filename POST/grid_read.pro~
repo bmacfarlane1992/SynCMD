@@ -1,0 +1,287 @@
+pro grid_read, arch_dir=arch_dir, sim1=sim1, sim2=sim2, tag=tag, hist_up=hist_up, $
+	hist_down=hist_down, hist_int=hist_int, col1=col1, col2=col2, mag_glob=mag_glob, $
+	count_stars=count_stars, logg_q=logg_q, help=help
+;
+; - - Procedure written to read im all grid populations as output by synthetic population tool,
+; - - and iterate to determine popualation densities for each (dim1,dim2) bin.
+; - - Procedure also determines binning fro [Fe/H] bins for both synthetic and simulation 
+; - - statistics attained. logg call may be used to supply a multiple evolutionary stage analysis.
+;
+;
+; = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
+; = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
+;
+;
+if (keyword_set(help) eq 1) then begin
+   Message, 'Usage:',/info
+   Message, 'grid_read, arch_dir=arch_dir, sim1=sim1, sim2=sim2, tag=tag,', /info
+   Message, 'hist_up=hist_up, hist_down=hist_down, hist_int=hist_int,', /info
+   Message, 'col1=col1, col2=col2, mag_glob=mag_glob, count_stars=count_stars,', /info
+   Message, 'logg_q=logg_q, help=help', /info
+   Message, 'Purpose: Determine population density of abundance relation bins ', /info
+   Message, '         and [Fe/H] range, for use in postmain plotting and analysis', /info
+   Message, 'Input:   arch_dir = Directory in which SynCMD package stored', /info
+   Message, '	      sim1 = Simulation used ([MaGICC, MUGS])', /info
+   Message, '	      sim2 = Simulation iteration used ([g1536, g15784])', /info
+   Message, '	      tag = SynCMD run tag association', /info
+   Message, '	      hist_$i$ ($i$=[up, down, int]) = Histogram parameters to', /info
+   Message, '	      to be utiltised within both simulation and synthetic analyses', /info
+   Message, '	      col$i$ ($i$=[1,2]) = String tag associated with CMD', /info
+   Message, '	      color selection', /info
+   Message, '	      mag_glob = String tag associated with CMD magnitude selection', /info
+   Message, '	      count_stars = Total number of composite stars in simulation. ', /info
+   Message, '	      logg_q = Input query as to output statistics of stellar ev.', /info
+   Message, '	      binned MDF statistics.', /info
+   Message, 'Outputs: synth_hist = Histogram data for use in', /info
+   Message, '	      comparison analyses', /info
+   Message, '	      stat_synthGLOBAL = unnormalised histogram data for use within', /info
+   Message, '	      statistic determination', /info
+   return
+endif
+;
+;
+	; - - - VARIABLE DEFINITIONS - - - ;
+;
+;
+	dim1=['ofe','mgfe','feh']
+	dim2=['feh','age','r']
+;
+	chem_gridup=1.
+	chem_griddown=-2.
+	chem_gridint=0.2
+	chem_gridnum=15
+;
+	age_gridup=13
+	age_griddown=0
+	age_gridint=1
+	age_gridnum=13
+;
+	r_gridup=15
+	r_griddown=0
+	r_gridint=1
+	r_gridnum=15
+;
+	chem_bins=chem_gridnum
+;
+	hist_num=(hist_up(0)-hist_down(0))/hist_int(0)
+;
+	col_appvec_sup=5
+	col_appvec_inf=-1
+	mag_appvec_sup=30
+	mag_appvec_inf=-1
+	arr_app=((col_appvec_sup-col_appvec_inf)/0.05)*((mag_appvec_sup-mag_appvec_inf)/0.05)
+;
+	dat_dir=arch_dir+'Outputs/PLOT_REF/'
+	spawn, 'mkdir '+dat_dir
+;
+;
+; = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
+; = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
+;
+;
+; - - -	MAIN PROGRAM - - - ;
+;
+;
+; - - - Comput the individual grip bin densities for the abundance relations, and print to file
+; - - - in directory defined by dat_dir and dimensional tags
+;
+for i=0L, n_elements(dim1)-1 do begin
+;
+
+	for j=0L, n_elements(dim2)-1 do begin
+;
+		if (dim1(i) eq dim2(j)) then continue
+;
+		case dim2(j) of
+			'feh': begin
+				dim2_down=chem_griddown
+				dim2_int=chem_gridint
+				dim2_bins=chem_gridnum
+			       end
+			'age': begin
+				dim2_down=age_griddown
+				dim2_int=age_gridint
+				dim2_bins=age_gridnum
+			       end
+			'r': begin
+				dim2_down=r_griddown
+				dim2_int=r_gridint
+				dim2_bins=r_gridnum
+			     end 
+		endcase
+;
+		gridlen=chem_bins*dim2_bins
+		y_point=fltarr(chem_bins)
+		x_point=fltarr(dim2_bins)
+		grid_x=fltarr(gridlen)
+		grid_y=fltarr(gridlen)
+		totstar=fltarr(gridlen)
+;
+		for l=0L, gridlen-1 do begin
+			filetag=strcompress(l+1,/remove_all)
+			filein=arch_dir+'Outputs/'+dim1(i)+'_'+dim2(j)+'/'+col1+col2+'_'+mag_glob+'_'+dim1(i)+dim2(j)+'_'+sim1+sim2+'_'+tag+'_'+filetag+'_APP.dat'
+;
+			col=fltarr(arr_app)
+			mag=fltarr(arr_app)
+			nsynth=fltarr(arr_app)
+			openr,lun,filein,/get_lun
+;
+			for m=0, arr_app-1 do begin
+				readf, lun, tmp1, tmp2, tmp3
+				nsynth(m)=tmp3
+			endfor
+;
+			totstar(l)=total(nsynth)
+			free_lun, lun
+;
+; - - - Arrange grid data so that x and y pointers have the correct grid star number association 
+;
+			grid_y(l)=chem_griddown+((chem_gridint)*floor(float(l)/chem_gridnum))+(chem_gridint/2.)
+			grid_x(l)=dim2_down+((dim2_int)*(float(l)-(chem_gridnum*floor(float(l)/chem_gridnum))))+(dim2_int/2.)
+;
+		endfor
+		print, 'The data for: ', dim1(i), ' vs. ', dim2(j), ' is now being printed in: ', dat_dir
+		fileout=dat_dir+dim1(i)+'_'+dim2(j)+'_synth.dat'
+		openw, lun, fileout, /get_lun
+;
+		for l=0, gridlen-1 do begin
+			printf, lun, grid_x(l), grid_y(l), totstar(l)
+		endfor
+		free_lun, lun		
+	endfor
+endfor
+;
+; - - - Compute the [Fe/H] histogram (synthetic density), and print to file in directory defined by
+; - - - dat_dir
+;
+synhist_dat=fltarr(hist_num)
+stat_synthGLOBAL=fltarr(hist_num)
+hist_cent=fltarr(hist_num)
+;
+for i=0, hist_num-1 do begin
+	hist_cent(i)=hist_down(0)+(i*(hist_int(0)))+(hist_int(0))-0.125
+	nsynth=fltarr(arr_app)
+	filein=arch_dir+'Outputs/feh_mdf/feh_mdf_'+col1+col2+'_'+mag_glob+'_MDFCMD'+sim1+sim2+'_'+tag+'_'+strcompress((i+1),/remove_all)+'_APP.dat'
+	openr,lun,filein,/get_lun
+;
+	for j=0L, arr_app-1 do begin
+		readf, lun, tmp1, tmp2, tmp3
+		nsynth(j)=tmp3	
+	endfor
+	synhist_dat(i)=total(nsynth)
+	stat_synthGLOBAL(i)=synhist_dat(i)
+	nsynth=0
+free_lun, lun
+endfor
+;
+tot_synth=total(synhist_dat)
+print, tot_synth
+synhist_dat=synhist_dat/tot_synth	
+;
+print, 'The data for the [Fe/H] MDF is now being printed in: ', dat_dir
+fileout=dat_dir+'feh_mdf_synth.dat'
+;
+openw, lun, fileout, /get_lun
+for l=0L, hist_num-1 do begin
+	printf, lun, hist_cent(l), synhist_dat(l)
+endfor
+free_lun, lun
+;
+; - - - If a multiple evolutionary analysis is taking place, the tag logg will output the MDF
+; - - - characteristics as required.
+;
+if  ((logg_q ne 0) AND (logg_q eq 1)) then begin
+;
+	synhistMS_dat=fltarr(hist_num)
+	stat_synthMS=fltarr(hist_num)
+	synhistSGP_dat=fltarr(hist_num)
+	stat_synthSGP=fltarr(hist_num)
+;
+	for i=0, hist_num-1 do begin
+		nsynth=fltarr(arr_app)
+		filein=arch_dir+'Outputs/feh_mdf/feh_mdf_'+col1+col2+'_'+mag_glob+'_MDFCMD'+sim1+sim2+'_MS'+tag+'_'+strcompress((i+1),/remove_all)+'_APP.dat'
+		openr,lun,filein,/get_lun
+		for j=0L, arr_app-1 do begin
+			readf, lun, tmp1, tmp2, tmp3
+			nsynth(j)=tmp3
+		endfor
+		synhistMS_dat(i)=total(nsynth)
+		stat_synthMS(i)=synhistMS_dat(i)
+		nsynth=0
+	free_lun, lun
+	endfor
+	print, 'MS+SG', total(stat_synthMS)
+	synhistMS_dat=synhistMS_dat/tot_synth	
+;
+	print, 'The MS+SG data for the [Fe/H] MDF is now being printed in: ', dat_dir
+	fileout=dat_dir+'feh_mdf_synthMS.dat'
+	openw, lun, fileout, /get_lun
+	for l=0, hist_num-1 do begin
+		printf, lun, hist_cent(l), synhist_dat(l)
+	endfor
+	free_lun, lun	
+;
+	for i=0, hist_num(0)-1 do begin
+		nsynth=dblarr(arr_app)
+	filein=arch_dir+'Outputs/feh_mdf/feh_mdf_'+col1+col2+'_'+mag_glob+'_MDFCMD'+sim1+sim2+'_SGP'+tag+'_'+strcompress((i+1),/remove_all)+'_APP.dat'
+	openr,lun,filein,/get_lun
+		for j=0L, arr_app-1 do begin
+			readf, lun, tmp1, tmp2, tmp3
+			nsynth(j)=tmp3	
+		endfor
+		synhistSGP_dat(i)=total(nsynth)
+		stat_synthSGP(i)=synhistSGP_dat(i)
+		nsynth=0
+	free_lun, lun
+	endfor
+	print, 'GB', total(stat_synthSGP)
+	synhistSGP_dat=synhistSGP_dat/tot_synth	
+;
+	print, 'The GB data for the [Fe/H] MDF is now being printed in: ', dat_dir
+	fileout=dat_dir+'feh_mdf_synthSGP.dat'
+	openw, lun, fileout, /get_lun
+	for l=0, hist_num-1 do begin
+		printf, lun, hist_cent(l), synhist_dat(l)
+	endfor
+	free_lun, lun	
+;
+endif
+;
+; - - - Carry out the same process for the simulation [Fe/H] distribution
+;
+feh=fltarr(count_stars(0))
+age=fltarr(count_stars(0))
+filein=arch_dir+'Inputs/CMDSTARS'+sim1+sim2+'_'+tag+'.dat'
+openr,lun,filein,/get_lun
+for i=0L, count_stars(0)-1 do begin
+	readf, lun, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, $
+		tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, $
+		tmp24,tmp25,tmp26
+	age(i)=tmp9
+	feh(i)=tmp20
+endfor
+free_lun, lun
+;
+; - - - Count the NORMALISED number of particles within a metallicity bin
+;
+simhist_dat=fltarr(hist_num)
+stat_sim=fltarr(hist_num)
+;
+print, count_stars(0)
+for i=0, hist_num-1 do begin
+  binpop=where((feh gt hist_down(0)+(hist_int(0)*i)) AND (feh lt hist_down(0)+(hist_int(0)*(i+1))))
+  simhist_dat(i)=n_elements(binpop)
+  stat_sim(i)=simhist_dat(i)
+  simhist_dat(i)=simhist_dat(i)/count_stars(0)
+endfor
+;
+print, 'The simulation (composite) [Fe/H] MDF is now being printed in: ', dat_dir
+fileout=dat_dir+'feh_mdf_sim.dat'
+openw, lun, fileout, /get_lun
+for l=0, hist_num-1 do begin
+	printf, lun, hist_cent(l), simhist_dat(l)
+endfor
+free_lun, lun	
+;
+;
+end	
