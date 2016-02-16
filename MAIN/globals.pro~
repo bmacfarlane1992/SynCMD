@@ -117,8 +117,6 @@ globals(2)=collim1
 globals(3)=collim2
 globals(4)=glim1
 globals(5)=glim2
-globals(6)=tefflim1
-globals(7)=tefflim2
 ;
 filename1=arch_dir+'Code/IDL_GLOBALS.dat'
 openw,lun,filename1,/get_lun

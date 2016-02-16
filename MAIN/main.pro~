@@ -106,7 +106,7 @@ if (pop_q eq 1) AND (pop_q ne 0) then begin
 	globals, arch_dir=arch_dir, sim1=sim1, sim2=sim2, tag=tag, $
 	col1=col1, col2=col2, mag_glob=mag_glob, $
 	maglim1=maglim1, maglim2=maglim2, collim1=collim1, collim2=collim2, $
-	glim1=glim1, glim2=glim2, tefflim1=tefflim1, tefflim2=tefflim2, help=0
+	glim1=glim1, glim2=glim2, help=0
 ;
 ;
 		; - - - Read global CMD into population package input file and define CMD

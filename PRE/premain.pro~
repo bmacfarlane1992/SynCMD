@@ -78,10 +78,6 @@ openw,lun,filename,/get_lun
 printf,lun, stars
 free_lun, lun
 ;
-	; - - - Feed in user defined variables for data to be analysed in both 1D and 2D DFs
-;
-params, arch_dir = arch_dir, help = 0
-;
 	; - - - Split, and print star data with metallicity binning as required for abundance analyses
 ;
 if ((sim1 eq 'MaGICC') OR (sim1 eq 'MUGS')) AND (sim1 ne 'Selene') then begin
