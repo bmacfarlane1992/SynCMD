@@ -36,7 +36,7 @@ if (sim1 eq 'MaGICC') AND (sim2 eq 'g1536') AND (sim1 ne 'MUGS') AND (sim2 ne 'g
 ;
 if (sim1 eq 'MaGICC') AND (sim2 eq 'g15784') AND (sim1 ne 'MUGS') AND (sim2 ne 'g1536')  then simdir=arch_dir+'Simulations/MaGICC-g15784-1024/g15784.01024'
 ;
-if (sim1 eq 'Selene') AND (sim1 ne 'MaGICC') AND (sim1 ne 'MUGS') then simdir=arch_dir+'Simulations/Selene/selene-ch-thermal_decomp_solar_blurred_shifted_filtered.txt'
+if (sim1 eq 'Selene') AND (sim1 ne 'MaGICC') AND (sim1 ne 'MUGS') then simdir=arch_dir+'Simulations/Selene/reduced_data_selene-ch-10.txt'
 ;
 return
 end

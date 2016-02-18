@@ -14,7 +14,7 @@
 ;		
 	; - - - VARIABLE DEFINITIONS - - - ;
 ;
-	arch_dir='/san/cosmic2/bmacfarlane/SynCMD/'
+	arch_dir='/san/cosmic/bthompson/syncmd_test/'
 ;
 	sim1='Selene'
 	sim2=''
