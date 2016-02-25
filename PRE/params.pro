@@ -1,4 +1,4 @@
-pro params, arch_dir=arch_dir
+pro params, arch_dir=arch_dir, help=help
 ;
 ; - - Procedure written to write parameters for cross directory analysis scripts
 ; 
@@ -30,16 +30,16 @@ dim2point = [19, 8, 4]
 ;
 	; Dimension splitting for 1D gridded data
 ;
-df = ['ofe','mgfe','feh',]
+df = ['ofe','mgfe','feh','age']
 dfpoint = [11,17,19,8]
 ;
 	; Dimension limits for dimensional data [start, end, step]
 	; If additional data array added that isn't indicated below, appendage to number
 	; of steps is needed.
 ;
-ofe_l = [-2., 1., 0.05]
-mgfe_l = [-2., 1., 0.05]
-feh_l = [-2., 1., 0.05]
+ofe_l = [-2., 1., 0.2]
+mgfe_l = [-2., 1., 0.2]
+feh_l = [-2., 1., 0.2]
 r_l = [15., 0., 0.5]
 age_l = [0., 14., 0.5]
 ;
@@ -66,7 +66,7 @@ age_l = age_l + n_step
 ;
 	; Print data into text file in ANALYSES/ directory
 ;
-filename = arch_dir+'ANALYSES/params.dat'
+filename = arch_dir+'Code/ANALYSES/params.dat'
 openw, lun, filename, /get_lun
 printf, lun, dim1
 printf, lun, dim1point
@@ -76,3 +76,5 @@ printf, lun, df
 printf, lun, dfpoint
 free_lun, lun
 
+return
+end
