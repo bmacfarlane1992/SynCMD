@@ -45,13 +45,13 @@ endif
 ;
 	chem_gridup=1.
 	chem_griddown=-2.
-	chem_gridint=0.05
-	chem_gridnum=60
+	chem_gridint=0.2
+	chem_gridnum=15
 ;
-	age_gridup=14
+	age_gridup=15
 	age_griddown=0
-	age_gridint=0.5
-	age_gridnum=28
+	age_gridint=1
+	age_gridnum=15
 ;
 	r_gridup=15
 	r_griddown=0
@@ -268,7 +268,12 @@ for c=0L, n_elements(dim1)-1 do begin
 	hist_cent=fltarr(hist_num)
 ;
 	for i=0, hist_num-1 do begin
-		hist_cent(i)=hist_down(0)+(i*(hist_int(0)))+(0.5*hist_int(0))
+
+		if (dim1(c) eq 'age') then begin
+			hist_cent(i) = age_griddown + (i*(age_gridint)) + (0.5*age_gridint)
+		endif else begin
+			hist_cent(i)=hist_down(0)+(i*(hist_int(0)))+(0.5*hist_int(0))
+		endelse
 		nsynth=fltarr(arr_app)
 		filein=arch_dir+'Outputs/'+dim1(c)+'_mdf/'+dim1(c)+'_mdf_'+col1+col2+'_'+ $
 			mag_glob+'_MDFCMD'+sim1+sim2+'_'+tag+'_'+strcompress((i+1),/remove_all)+'_APP.dat'

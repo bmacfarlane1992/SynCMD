@@ -29,9 +29,9 @@ endif
 dim1=['ofe','mgfe','feh','age']
 dim1point=[11,17,19,8]
 ;
-agehist_up = 14.
+agehist_up = 15.
 agehist_down = 0.
-agehist_int = 0.5
+agehist_int = 1
 ;
 ; - - -	MAIN PROGRAM - - - ;
 ;

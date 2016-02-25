@@ -14,7 +14,7 @@
 ;		
 	; - - - VARIABLE DEFINITIONS - - - ;
 ;
-	arch_dir='/san/cosmic/bthompson/syncmd_test/'
+	arch_dir='/san/cosmic/bthompson/syncmd_git/syncmd/'
 ;
 	sim1='Selene'
 	sim2=''
@@ -38,8 +38,8 @@
 	extinct_q=0
 ;
 	hist_up=1
-	hist_down=-3
-	hist_int=0.25 
+	hist_down=-2
+	hist_int=0.2
 ;
 ;
 ; = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 

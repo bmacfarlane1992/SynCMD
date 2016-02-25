@@ -37,9 +37,9 @@ dfpoint = [11,17,19,8]
 	; If additional data array added that isn't indicated below, appendage to number
 	; of steps is needed.
 ;
-ofe_l = [-2., 1., 0.05]
-mgfe_l = [-2., 1., 0.05]
-feh_l = [-2., 1., 0.05]
+ofe_l = [-2., 1., 0.2]
+mgfe_l = [-2., 1., 0.2]
+feh_l = [-2., 1., 0.2]
 r_l = [15., 0., 0.5]
 age_l = [0., 14., 0.5]
 ;
